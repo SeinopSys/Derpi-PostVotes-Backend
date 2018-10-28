@@ -3,9 +3,9 @@ const
 	Datastore = require('nedb'),
 	db = {
 		/* userId, type, id, value */
-		votes: new Datastore({ filename: 'db/votes.json', autoload: true }),
+		votes: new Datastore({ filename: 'db/votes.txt', autoload: true }),
 		/* type, id, score */
-		scores: new Datastore({ filename: 'db/scores.json', autoload: true }),
+		scores: new Datastore({ filename: 'db/scores.txt', autoload: true }),
 	},
 	fiveMinutesInMs = 3e5,
 	supportedEntityTypes = ['comment', 'post'];
