@@ -177,6 +177,8 @@ function getScores(entities, userId) {
 			if (_.isArray(entities[type]))
 				query.$or.push({ type, id: { $in: entities[type] } });
 		});
+		if (query.$or.length === 0)
+			return;
 		db.scores.find(query, (err, docs) => {
 			if (err) return rej(err);
 
