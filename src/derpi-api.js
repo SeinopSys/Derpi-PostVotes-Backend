@@ -18,7 +18,7 @@ function fetchUser(apiKey){
  * @returns {Promise<Object>}
  */
 function checkApiKey(key){
-	if (typeof key !== 'string' || !/^[A-Za-z\d]+$/.test(key))
+	if (typeof key !== 'string' || !/^[A-Za-z\d-]+$/.test(key))
 		return Promise.reject();
 
 	return new Promise(res => {
