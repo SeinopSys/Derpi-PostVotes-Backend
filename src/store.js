@@ -152,6 +152,7 @@ function vote(userId, type, id, direction) {
 					existingVote.value = value;
 					next(existingVote);
 				});
+				return;
 			}
 
 			db.votes.insert({ userId, type, id, value }, (err, newVote) => {
