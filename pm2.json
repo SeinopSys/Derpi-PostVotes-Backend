@@ -3,6 +3,7 @@
 		{
 			"name": "Derpi-PostVotes-Backend",
 			"script": "src/server.js",
+			"node_args": "--max-old-space-size=256",
 			"log_date_format": "YYYY-MM-DD HH:mm:ss Z"
 		}
 	]
