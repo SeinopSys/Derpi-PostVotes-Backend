@@ -1,10 +1,10 @@
 const FastRateLimit = require('fast-ratelimit').FastRateLimit;
+const config = require('./config');
 
 const options = {
-	threshold: 10, // number of tokens
-	ttl: 50, // seconds until counter reset
+	threshold: config.RATE_LIMIT_THRESHOLD, // number of tokens
+	ttl: config.RATE_LIMIT_TTL, // seconds until bucket reset
 };
 const votes = new FastRateLimit(options);
-
 
 module.exports = { votes, options };

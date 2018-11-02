@@ -8,6 +8,10 @@ module.exports = {
 	LE_DOMAINS: ['derpi-postvotes.lc'],
 	CF_KEY: '',
 
+	// THRESHOLD number of votes can be cast every TTL seconds
+	RATE_LIMIT_THRESHOLD: 1,
+	RATE_LIMIT_TTL: 5,
+
 	// For development only
 	LOCALHOST: true,
 	SSL_CERT: '/path/to/ssl.crt',
