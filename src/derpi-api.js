@@ -9,7 +9,7 @@ const
 function fetchUser(apiKey){
 	return fetch(`https://derpibooru.org/api/v2/users/current.json?key=${apiKey}`)
 		.then(r => r.json())
-		.then(r => _.isObject(r) ? Promise.resolve(r) : Promise.reject());
+		.then(r => _.isObject(r) ? Promise.resolve(r.id) : Promise.reject());
 }
 
 /**

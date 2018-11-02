@@ -117,6 +117,9 @@ function getUserVote(userId, type, id) {
  */
 function vote(userId, type, id, direction) {
 	return new Promise((res, rej) => {
+		id = parseInt(id, 10);
+		if (isNaN(id) || !isFinite(id))
+			return Promise.reject(new TypeError('id must be a number'));
 		getUserVote(userId, type, id).then(existingVote => {
 			let value;
 			switch (direction){
@@ -128,7 +131,7 @@ function vote(userId, type, id, direction) {
 					break;
 				default:
 					if (!existingVote)
-						return rej();
+						return rej(new Error('Trying to undo a non-existing vote'));
 					value = null;
 			}
 

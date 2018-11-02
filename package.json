@@ -1,6 +1,6 @@
 {
 	"name": "derpi-postvotes-backend",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"dependencies": {
 		"cors": "^2.8.0",
 		"express": "^4.16.4",

@@ -7,7 +7,7 @@ const
 	cors = require('cors'),
 	config = require('./config'),
 	pkg = require('../package.json'),
-	socketUsers = new WeakMap(),
+	socketUserIDs = new WeakMap(),
 	derpi = require('./derpi-api.js'),
 	store = require('./store.js'),
 	rateLimit = require('./rate-limit.js');
@@ -69,30 +69,38 @@ console.log(`[Socket.io] Server listening on port ${config.PORT}`);
 
 io.on('connection', function(socket) {
 	socket.on('auth', data => {
-		derpi.checkApiKey(data.apiKey).then(user => {
-			socketUsers.set(socket, { id: user.id });
-			socket.emit('auth', { status: true, user, version: pkg.version });
+		derpi.checkApiKey(data.apiKey).then(userId => {
+			socketUserIDs.set(socket, userId);
+			socket.emit('auth', {
+				status: true,
+				userId: userId,
+				user: {
+					id: userId,
+					name: `user ${userId}`,
+				},
+				version: pkg.version,
+			});
 		}).catch(() => {
 			socket.emit('auth', { status: false });
 		});
 	});
 	socket.on('get-scores', (data, resp) => {
-		const user = socketUsers.get(socket);
-		if (!user || !user.id)
+		const userId = socketUserIDs.get(socket);
+		if (!userId)
 			return;
 
-		store.getScores(data.entities, user.id).then(resp);
+		store.getScores(data.entities, userId).then(resp);
 	});
 	socket.on('vote', data => {
-		const user = socketUsers.get(socket);
-		if (!user || !user.id)
+		const userId = socketUserIDs.get(socket);
+		if (!userId)
 			return;
 
-		rateLimit.votes.consume(user.id)
+		rateLimit.votes.consume(userId)
 			.then(() => {
-				store.vote(user.id, data.type, data.id, data.direction).then(data => {
+				store.vote(userId, data.type, data.id, data.direction).then(data => {
 
-					if (rateLimit.votes.hasTokenSync(user.id) === false) {
+					if (rateLimit.votes.hasTokenSync(userId) === false) {
 						socket.emit('vote-limit-reached', { allowVotingIn: rateLimit.options.ttl });
 					}
 					io.sockets.emit('vote-cast', data);
@@ -103,6 +111,6 @@ io.on('connection', function(socket) {
 			});
 	});
 	socket.on('disconnect', () => {
-		socketUsers.delete(socket);
+		socketUserIDs.delete(socket);
 	});
 });
