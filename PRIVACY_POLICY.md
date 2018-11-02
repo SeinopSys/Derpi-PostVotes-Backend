@@ -8,4 +8,4 @@ When you submit a vote, the system will indefinitely store your Derpibooru User 
 
 ## How is my API key used?
 
-When you visit any page on Derpibooru the extension will connect to the backend server and authenticate you based on your API key. This is done by making a request to Derpibooru's API to get the current user's information, which includes your User ID. All data except for this user ID is discarded after this process is completed and future interactions will use the User ID as a basis for all actions you perform with the extension.
+When you visit any page on Derpibooru the extension will connect to the backend server and authenticate you based on your API key. This is done by making a request to Derpibooru's API to get the current user's information, which includes your User ID. All data except for this User ID is discarded after this process is completed and future interactions will use the User ID as a basis for all actions you perform with the extension.
