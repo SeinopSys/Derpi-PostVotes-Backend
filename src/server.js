@@ -9,20 +9,21 @@ const
 	pkg = require('../package.json'),
 	socketUsers = new WeakMap(),
 	derpi = require('./derpi-api.js'),
-	store = require('./store.js');
+	store = require('./store.js'),
+	rateLimit = require('./rate-limit.js');
 
 // Add timestamps to console
 moment.locale('en');
 moment.tz.add('Europe/Budapest|CET CEST|-10 -20|01010101010101010101010|1BWp0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00|11e6');
 moment.tz.setDefault('Europe/Budapest');
-require('log-timestamp')(() => moment().format('YYYY-MM-DD HH:mm:ss.SSS')+' | %s');
+require('log-timestamp')(() => moment().format('YYYY-MM-DD HH:mm:ss.SSS') + ' | %s');
 
 let app = express();
 
 // CORS
 app.use(cors({ origin: config.ORIGIN_REGEX }));
 
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
 	res.sendStatus(403);
 });
 
@@ -57,7 +58,7 @@ else {
 }
 server.listen(config.PORT, '0.0.0.0');
 let io = SocketIO.listen(server);
-io.origins(function(origin, callback){
+io.origins(function(origin, callback) {
 	if (!config.ORIGIN_REGEX.test(origin)){
 		return callback('origin not allowed', false);
 	}
@@ -66,7 +67,7 @@ io.origins(function(origin, callback){
 
 console.log(`[Socket.io] Server listening on port ${config.PORT}`);
 
-io.on('connection', function(socket){
+io.on('connection', function(socket) {
 	socket.on('auth', data => {
 		derpi.checkApiKey(data.apiKey).then(user => {
 			socketUsers.set(socket, { id: user.id });
@@ -87,9 +88,19 @@ io.on('connection', function(socket){
 		if (!user || !user.id)
 			return;
 
-		store.vote(user.id, data.type, data.id, data.direction).then(data => {
-			io.sockets.emit('vote-cast', data);
-		});
+		rateLimit.votes.consume(user.id)
+			.then(() => {
+				store.vote(user.id, data.type, data.id, data.direction).then(data => {
+
+					if (rateLimit.votes.hasTokenSync(user.id) === false) {
+						socket.emit('vote-limit-reached', { allowVotingIn: rateLimit.options.ttl });
+					}
+					io.sockets.emit('vote-cast', data);
+				});
+			})
+			.catch(() => {
+				socket.emit('rate-limit', rateLimit.options);
+			});
 	});
 	socket.on('disconnect', () => {
 		socketUsers.delete(socket);

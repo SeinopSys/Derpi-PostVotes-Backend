@@ -6,13 +6,18 @@
 	"extends": "eslint:recommended",
 	"parserOptions": {
 		"ecmaVersion": 6,
-		"sourceType": "module"
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"experimentalObjectRestSpread": true
+		}
 	},
 	"rules": {
 		"indent": [
 			"error",
 			"tab",
-			{"SwitchCase": 1}
+			{
+				"SwitchCase": 1
+			}
 		],
 		"linebreak-style": [
 			"error",

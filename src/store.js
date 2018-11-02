@@ -36,10 +36,11 @@ function calcScore(type, id) {
  * @param {number} id
  * @return {Promise<number>}
  */
-function updateScore(type, id){
+function updateScore(type, id) {
 	return new Promise((res, rej) => {
 		calcScore(type, id).then(score => {
-			db.scores.update({ type, id }, { type, id, score }, { upsert: true, returnUpdatedDocs: true }, (err, _, doc) => {
+			const queryObj = { type, id };
+			db.scores.update(queryObj, { ...queryObj, score }, { upsert: true, returnUpdatedDocs: true }, (err, _, doc) => {
 				if (err) return rej(err);
 
 				res(doc);
@@ -66,7 +67,7 @@ function transformUserVotes(docs) {
  * @param {Object[]} docs
  * @return {Object}
  */
-function transformBroacastVotes(docs) {
+function transformBroadcastVotes(docs) {
 	const broadcastVotes = {};
 	docs.forEach(doc => {
 		if (broadcastVotes[`${doc.type}_${doc.id}`] === undefined)
@@ -134,19 +135,20 @@ function vote(userId, type, id, direction) {
 			const next = (newVote) => {
 				updateScore(type, id).then(newScores => {
 					const scores = transformScores([newScores]);
-					const userVotes = transformBroacastVotes([newVote]);
+					const userVotes = transformBroadcastVotes([newVote]);
 					res({ scores, userVotes });
 				});
 			};
 			if (existingVote){
+				const queryObj = { userId, type, id };
 				if (value === null)
-					db.votes.remove({ userId, type, id }, err => {
+					db.votes.remove(queryObj, err => {
 						if (err) return rej();
 
 						existingVote.value = null;
 						next(existingVote);
 					});
-				else db.votes.update({ userId, type, id }, { value }, err => {
+				else db.votes.update(queryObj, { ...queryObj, value }, err => {
 					if (err) return rej();
 
 					existingVote.value = value;
